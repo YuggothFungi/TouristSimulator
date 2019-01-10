@@ -3,7 +3,7 @@ class Player(object):
 
     def __init__(self, stamina):
         """Constructor"""
-        # self.isalive = True
+        self.is_alive = True
         self.stamina = stamina
 
 
@@ -14,7 +14,11 @@ def perform_sleep(duration):
 
 def perform_run(duration):
     player.stamina = player.stamina - 4*duration
-    print(player.stamina)
+    if player.stamina > 0:
+        print(player.stamina)
+    else:
+        player.is_alive = False
+        print("Game over!")
 
 
 def player_action(action, duration):
@@ -29,6 +33,7 @@ action_map = {'sleep': perform_sleep, 'run': perform_run}
 
 if __name__ == "__main__":
     player = Player(50)
-    act = input("Choose action ")
-    dur = input("Choose duration ")
-    player_action(act, dur)
+    while player.is_alive:
+        act = input("Choose action ")
+        dur = input("Choose duration ")
+        player_action(act, dur)
