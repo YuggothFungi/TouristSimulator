@@ -1,20 +1,35 @@
 class Player(object):
     """Only one player in the game"""
 
-    def __init__(self, stamina):
+    def __init__(self, stamina, satiety):
         """Constructor"""
         self.is_alive = True
         self.stamina = stamina
+        self.satiety = satiety
 
 
-"""Function declaration"""
+def player_alive(player_check):
+    if (player_check.satiety or player_check.stamina) <= 0:
+        player_check.is_alive = False
+        print("Game over!")
+
+
+def update_player(player_update):
+    print(player_update.stamina)
+    print(player_update.satiety)
+
+
 def perform_sleep(duration):
     """
     Function is called when 'sleep' action is selected
     Sleeping increases stamina
     """
-    player.stamina = player.stamina + 2*duration
-    print(player.stamina)
+    player.stamina = player.stamina + 4*duration
+    player.satiety = player.satiety - 2*duration
+
+    player_alive(player)
+    if player.is_alive:
+        update_player(player)
 
 
 def perform_run(duration):
@@ -23,11 +38,11 @@ def perform_run(duration):
     Running decreases stamina
     """
     player.stamina = player.stamina - 4*duration
-    if player.stamina > 0:
-        print(player.stamina)
-    else:
-        player.is_alive = False
-        print("Game over!")
+    player.satiety = player.satiety - 4*duration
+
+    player_alive(player)
+    if player.is_alive:
+        update_player(player)
 
 
 def player_action(action, duration):
@@ -51,7 +66,7 @@ action_map = {'sleep': perform_sleep, 'run': perform_run}
 
 if __name__ == "__main__":
     """Create player and call for action while player is alive"""
-    player = Player(50)
+    player = Player(50.0, 50.0)
     while player.is_alive:
         act = input("Choose action ")
         dur = input("Choose duration ")
