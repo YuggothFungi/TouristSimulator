@@ -2,16 +2,26 @@ class Player(object):
     """Only one player in the game"""
 
     def __init__(self, stamina, satiety):
-        """Constructor"""
         self.is_alive = True
         self.stamina = stamina
         self.satiety = satiety
 
 
+class Environment(object):
+    """
+    Environment is set by the scenario, it is initiated with start_time and weather
+    Weather is not implemented yet, will be reported as stub
+    """
+    def __init__(self, time, weather):
+        self.start_time = time
+        self.weather = weather
+        self.counter = 0
+
+
 def player_alive(player_check):
     if player_check.satiety <= 0.0 or player_check.stamina <= 0.0:
         player_check.is_alive = False
-        print("Game over!")
+        print("Your vacation is over!")
 
 
 def update_player(player_update):
@@ -19,30 +29,46 @@ def update_player(player_update):
     print("Satiety: " + str(player_update.satiety))
 
 
+def update_time(start_time, counter):
+    first_day = 24 - start_time
+    if counter > first_day:
+        rest_counter = counter - first_day
+    else:
+        rest_counter = counter + start_time
+    full_days = 1 + ((counter + start_time) // 24)
+    rest_hours = rest_counter % 24
+
+    print("Day {0} hour {1}".format(full_days, rest_hours))
+
+
 def perform_sleep(duration):
     """
     Function is called when 'sleep' action is selected
     Sleeping increases stamina
     """
-    player.stamina = player.stamina + 4 * duration
-    player.satiety = player.satiety - 2 * duration
+    player.stamina += 4 * duration
+    player.satiety -= 2 * duration
+    environment.counter += duration
 
     player_alive(player)
     if player.is_alive:
         update_player(player)
+        update_time(environment.start_time, environment.counter)
 
 
-def perform_run(duration):
+def perform_sunbath(duration):
     """
     Function is called when 'run' action is selected
     Running decreases stamina
     """
-    player.stamina = player.stamina - 4 * duration
-    player.satiety = player.satiety - 4 * duration
+    player.stamina -= 4 * duration
+    player.satiety -= 4 * duration
+    environment.counter += duration
 
     player_alive(player)
     if player.is_alive:
         update_player(player)
+        update_time(environment.start_time, environment.counter)
 
 
 def perform_eat(meal_type):
@@ -50,9 +76,13 @@ def perform_eat(meal_type):
     Function is called when 'eat' action is selected
     Eating increases satiety
     To do: eating should take fixed duration depending on meal_type
+    To do: passing certain satiety threshold should result in overeating => health issues
     """
-    player.satiety = player.satiety + meal_map[meal_type]
+    player.satiety += meal_map[meal_type]
+    environment.counter += meal_duration[meal_type]
+
     update_player(player)
+    update_time(environment.start_time, environment.counter)
 
 
 def player_action(action, duration=None, meal_type=None):
@@ -78,12 +108,14 @@ def player_action(action, duration=None, meal_type=None):
 
 
 """?Define global variables?"""
-action_map = {'sleep': perform_sleep, 'run': perform_run, 'eat': perform_eat}
+action_map = {'sleep': perform_sleep, 'sunbath': perform_sunbath, 'eat': perform_eat}
 meal_map = {'fast': 10.0, 'break': 10.0, 'lunch': 15.0, 'dinner': 20.0, 'feast': 30.0}
+meal_duration = {'fast': 0.4, 'break': 0.7, 'lunch': 1.0, 'dinner': 1.5, 'feast': 3.0}
 
 if __name__ == "__main__":
     """Create player and call for action while player is alive"""
     player = Player(50.0, 50.0)
+    environment = Environment(7, ['sunny', 30])
     while player.is_alive:
         act = input("Choose action ")
         if act == 'eat':
